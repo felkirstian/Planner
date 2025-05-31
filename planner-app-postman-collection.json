@@ -1,0 +1,459 @@
+{
+	"info": {
+		"_postman_id": "f516923f-80d7-4609-ab29-880ea9a29ac3",
+		"name": "Planner App API",
+		"description": "# Planner App API Documentation\n\nThis is a comprehensive Laravel-based Planner application that integrates various APIs for task management, weather information, quotes, holidays, and timezone data.\n\n## Setup Instructions\n\n1. Ensure the Laravel application is running (default: http://localhost:8000)\n2. Import this collection into Postman\n3. Set up environment variables:\n   - `base_url`: Your API base URL (e.g., http://localhost:8000/api)\n   - `token`: Will be automatically populated after login\n\n## Authentication\nThe API uses Laravel Sanctum for authentication. Most endpoints require a valid Bearer token which you can obtain through the login endpoint.\n\n## Available Features\n- Task Management (CRUD operations)\n- Weather Information\n- Inspirational Quotes\n- Holiday Calendar\n- Timezone Information",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "41526841"
+	},
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8000/api",
+			"type": "string"
+		},
+		{
+			"key": "token",
+			"value": "",
+			"type": "string"
+		}
+	],
+	"item": [
+		{
+			"name": "Authentication",
+			"item": [
+				{
+					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.token) {",
+									"    pm.collectionVariables.set(\"token\", jsonData.token);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"your-email@example.com\",\n    \"password\": \"your-password\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"login"
+							]
+						},
+						"description": "Authenticate user and receive API token.\n\nRequired fields:\n- email: User's email address\n- password: User's password\n\nExample Success Response:\n```json\n{\n    \"status\": \"success\",\n    \"message\": \"Login successful\",\n    \"token\": \"1|abcdef123456...\",\n    \"user\": {\n        \"id\": 1,\n        \"name\": \"John Doe\",\n        \"email\": \"john@example.com\"\n    }\n}\n```\n\nExample Error Response:\n```json\n{\n    \"status\": \"error\",\n    \"message\": \"Invalid credentials\"\n}\n```"
+					},
+					"response": []
+				},
+				{
+					"name": "Logout",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/logout",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"logout"
+							]
+						},
+						"description": "Invalidate the current API token.\n\nExample Success Response:\n```json\n{\n    \"status\": \"success\",\n    \"message\": \"Successfully logged out\"\n}\n```\n\nExample Error Response:\n```json\n{\n    \"status\": \"error\",\n    \"message\": \"Unauthenticated\"\n}\n```"
+					},
+					"response": []
+				}
+			],
+			"description": "Authentication endpoints for managing API access tokens."
+		},
+		{
+			"name": "Tasks",
+			"item": [
+				{
+					"name": "List Tasks",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/tasks",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"tasks"
+							]
+						},
+						"description": "Get all tasks for the authenticated user.\n\nExample Success Response:\n```json\n{\n    \"status\": \"success\",\n    \"data\": [\n        {\n            \"id\": 1,\n            \"title\": \"Complete project documentation\",\n            \"description\": \"Write comprehensive documentation for the API\",\n            \"due_date\": \"2024-06-01\",\n            \"priority\": \"high\",\n            \"completed\": false,\n            \"created_at\": \"2024-05-30T12:00:00.000000Z\"\n        },\n        {\n            \"id\": 2,\n            \"title\": \"Team meeting\",\n            \"description\": \"Weekly sync with the development team\",\n            \"due_date\": \"2024-05-31\",\n            \"priority\": \"medium\",\n            \"completed\": false,\n            \"created_at\": \"2024-05-30T12:00:00.000000Z\"\n        }\n    ]\n}\n```\n\nExample Error Response:\n```json\n{\n    \"status\": \"error\",\n    \"message\": \"Unauthenticated\"\n}\n```"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Task",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"New Task\",\n    \"description\": \"Task description\",\n    \"due_date\": \"2024-06-01\",\n    \"priority\": \"high\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/tasks",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"tasks"
+							]
+						},
+						"description": "Create a new task.\n\nRequired fields:\n- title: Task title\n- description: Task description\n- due_date: Due date (YYYY-MM-DD)\n- priority: Task priority (low, medium, high)\n\nExample Success Response:\n```json\n{\n    \"status\": \"success\",\n    \"message\": \"Task created successfully\",\n    \"data\": {\n        \"id\": 3,\n        \"title\": \"New Task\",\n        \"description\": \"Task description\",\n        \"due_date\": \"2024-06-01\",\n        \"priority\": \"high\",\n        \"completed\": false,\n        \"created_at\": \"2024-05-30T12:00:00.000000Z\"\n    }\n}\n```\n\nExample Error Response:\n```json\n{\n    \"status\": \"error\",\n    \"message\": \"Validation failed\",\n    \"errors\": {\n        \"title\": [\"The title field is required\"],\n        \"due_date\": [\"The due date must be a valid date\"]\n    }\n}\n```"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Task",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"Updated Task\",\n    \"description\": \"Updated description\",\n    \"due_date\": \"2024-06-02\",\n    \"priority\": \"medium\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/tasks/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"tasks",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						},
+						"description": "Update an existing task.\n\nRequired fields:\n- title: Task title\n- description: Task description\n- due_date: Due date (YYYY-MM-DD)\n- priority: Task priority (low, medium, high)\n\nExample Success Response:\n```json\n{\n    \"status\": \"success\",\n    \"message\": \"Task updated successfully\",\n    \"data\": {\n        \"id\": 1,\n        \"title\": \"Updated Task\",\n        \"description\": \"Updated description\",\n        \"due_date\": \"2024-06-02\",\n        \"priority\": \"medium\",\n        \"completed\": false,\n        \"created_at\": \"2024-05-30T12:00:00.000000Z\"\n    }\n}\n```\n\nExample Error Response:\n```json\n{\n    \"status\": \"error\",\n    \"message\": \"Task not found\"\n}\n```"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Task",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/tasks/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"tasks",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						},
+						"description": "Delete a task.\n\nExample Success Response:\n```json\n{\n    \"status\": \"success\",\n    \"message\": \"Task deleted successfully\"\n}\n```\n\nExample Error Response:\n```json\n{\n    \"status\": \"error\",\n    \"message\": \"Task not found\"\n}\n```"
+					},
+					"response": []
+				},
+				{
+					"name": "Toggle Task Completion",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/tasks/:id/complete",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"tasks",
+								":id",
+								"complete"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						},
+						"description": "Toggle the completion status of a task.\n\nExample Success Response:\n```json\n{\n    \"status\": \"success\",\n    \"message\": \"Task completion status updated\",\n    \"data\": {\n        \"id\": 1,\n        \"title\": \"Complete project documentation\",\n        \"completed\": true,\n        \"completed_at\": \"2024-05-30T12:00:00.000000Z\"\n    }\n}\n```\n\nExample Error Response:\n```json\n{\n    \"status\": \"error\",\n    \"message\": \"Task not found\"\n}\n```"
+					},
+					"response": []
+				}
+			],
+			"description": "Task management endpoints for creating, reading, updating, and deleting tasks."
+		},
+		{
+			"name": "Weather",
+			"item": [
+				{
+					"name": "Get Current Weather",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/weather/current",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"weather",
+								"current"
+							]
+						},
+						"description": "Get current weather information for the user's location.\n\nExample Success Response:\n```json\n{\n    \"status\": \"success\",\n    \"data\": {\n        \"location\": {\n            \"name\": \"London\",\n            \"country\": \"UK\",\n            \"lat\": 51.52,\n            \"lon\": -0.11\n        },\n        \"current\": {\n            \"temp_c\": 18,\n            \"temp_f\": 64.4,\n            \"condition\": {\n                \"text\": \"Partly cloudy\",\n                \"icon\": \"//cdn.weatherapi.com/weather/64x64/day/116.png\"\n            },\n            \"wind_kph\": 15.1,\n            \"humidity\": 71\n        }\n    }\n}\n```\n\nExample Error Response:\n```json\n{\n    \"status\": \"error\",\n    \"message\": \"Weather data unavailable\"\n}\n```"
+					},
+					"response": []
+				}
+			],
+			"description": "Weather-related endpoints for current conditions and forecasts."
+		},
+		{
+			"name": "Quotes",
+			"item": [
+				{
+					"name": "Get Random Quote",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/quotes/random",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"quotes",
+								"random"
+							]
+						},
+						"description": "Get a random inspirational quote.\n\nExample Success Response:\n```json\n{\n    \"status\": \"success\",\n    \"data\": {\n        \"quote\": \"Success is not final, failure is not fatal: it is the courage to continue that counts.\",\n        \"author\": \"Winston Churchill\"\n    }\n}\n```\n\nExample Error Response:\n```json\n{\n    \"status\": \"error\",\n    \"message\": \"Quote service unavailable\"\n}\n```"
+					},
+					"response": []
+				}
+			],
+			"description": "Quote-related endpoints for accessing and managing inspirational quotes."
+		},
+		{
+			"name": "Holidays",
+			"item": [
+				{
+					"name": "Get Monthly Holidays",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/holidays/month",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"holidays",
+								"month"
+							]
+						},
+						"description": "Get holidays for the current month.\n\nExample Success Response:\n```json\n{\n    \"status\": \"success\",\n    \"data\": {\n        \"month\": \"May\",\n        \"year\": 2024,\n        \"holidays\": [\n            {\n                \"name\": \"Early May Bank Holiday\",\n                \"date\": \"2024-05-06\",\n                \"type\": \"Public Holiday\"\n            },\n            {\n                \"name\": \"Spring Bank Holiday\",\n                \"date\": \"2024-05-27\",\n                \"type\": \"Public Holiday\"\n            }\n        ]\n    }\n}\n```\n\nExample Error Response:\n```json\n{\n    \"status\": \"error\",\n    \"message\": \"Holiday data unavailable\"\n}\n```"
+					},
+					"response": []
+				}
+			],
+			"description": "Holiday-related endpoints for accessing calendar information."
+		},
+		{
+			"name": "Timezone",
+			"item": [
+				{
+					"name": "Get City Timezone",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/timezone/city",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"timezone",
+								"city"
+							]
+						},
+						"description": "Get timezone information for the user's city.\n\nExample Success Response:\n```json\n{\n    \"status\": \"success\",\n    \"data\": {\n        \"timezone\": \"Europe/London\",\n        \"datetime\": \"2024-05-30 12:00:00\",\n        \"offset\": \"+01:00\",\n        \"day_of_week\": \"Thursday\"\n    }\n}\n```\n\nExample Error Response:\n```json\n{\n    \"status\": \"error\",\n    \"message\": \"Timezone data unavailable\"\n}\n```"
+					},
+					"response": []
+				}
+			],
+			"description": "Timezone-related endpoints for accessing time information for different locations."
+		},
+		{
+			"name": "API Test",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{base_url}}/test",
+					"host": ["{{base_url}}"],
+					"path": ["test"]
+				},
+				"description": "Test endpoint to verify if the API is working.\n\nReturns:\n- message: Status message\n- timestamp: Current server time\n- status: HTTP status code"
+			}
+		}
+	]
+} 
